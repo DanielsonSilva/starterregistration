@@ -6,6 +6,11 @@ use yii\db\ActiveRecord;
 
 class Customer extends ActiveRecord
 {
+	public static function primaryKey()
+    {
+        return ["id_customer"];
+    }
+
 	public static function tableName()
 	{
         return 'customer';
@@ -30,7 +35,8 @@ class Customer extends ActiveRecord
 	{
 		return [
 			[['str_firstname', 'str_lastname', 'str_telephone', 'str_address','num_house', 'str_zip', 'id_city', 'str_account', 'str_iban'],'required'],
-			['num_house', 'integer', 'message' => 'The house number must be a number']
+			['num_house', 'integer', 'message' => 'The house number must be a number'],
+			['id_customer, str_firstname, str_lastname, str_telephone, str_address,num_house, str_zip, id_city, str_account, str_iban', 'safe']
 		];
 	}
 }

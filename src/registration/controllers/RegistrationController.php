@@ -41,6 +41,11 @@ class RegistrationController extends Controller
      */
     public function actionIndex()
     {
+		// $session = Yii::$app->session;
+		// if (!$session->isActive) {
+		// 	$session->open();
+		// }
+		// $session->destroy();
 		$this->layout = 'registrationLayout';
         return $this->render('CustomerFormEntry');
     }
@@ -131,13 +136,20 @@ class RegistrationController extends Controller
 	 */
 	private function saveCustomer(): int
 	{
+		// Models
 		$customerModel = new Customer();
 		$logCustomerModel = new LogCustomer();
+		// Session
+		$session = Yii::$app->session;
+		if (!$session->isActive) {
+			$session->open();
+		}
 		// Start Transaction
 		$transaction = Customer::getDb()->beginTransaction();
 		try {
 			// Save the Customer data
 			$customerModel->attributes = [
+				'id_customer' => null,
 				'str_firstname' => $session->get('str_firstname'),
 				'str_lastname' => $session->get('str_lastname'),
 				'str_telephone' => $session->get('str_telephone'),
@@ -150,13 +162,15 @@ class RegistrationController extends Controller
 			];
 			$customerModel->save();
 			//save the log
-			$logCustomerModel->attibutes = [
+			$logCustomerModel->attributes = [
 				'id_customer' => $customerModel->getPrimaryKey(),
 				'dt_activation' => date('Y-m-d H:i:s')
 			];
 			$logCustomerModel->save();
 			$transaction->commit();
-			return $customerModel->getPrimaryKey();
+			$customerModel->refresh();
+			var_dump($customerModel->getAttributes());die();
+			return $primaryKey;
 		} catch(\Exception $e) {
     		$transaction->rollBack();
     		throw $e;

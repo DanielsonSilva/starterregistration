@@ -25,7 +25,7 @@ AppAsset::register($this);
 </head>
 <body>
 <?php $this->beginBody() ?>
-
+<link rel="shortcut icon" href="./../resources/favicon.ico" type="image/x-icon"/>
 <div class="wrap">
     <?php
     NavBar::begin([
