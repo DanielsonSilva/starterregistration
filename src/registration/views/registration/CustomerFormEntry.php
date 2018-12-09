@@ -14,6 +14,12 @@ $entryMessage = <<<MSG
 	</p><br />
 MSG;
 
-$buttonProceed = Html::a('Start Registration', ['/registration/customerform'],['class' => 'btn btn-primary']);
+// name of the button to proceed
+if ($continue) {
+	$nameButton = "Continue Registration";
+} else {
+	$nameButton = "Start Registration";
+}
+$buttonProceed = Html::a($nameButton, ['/registration/customerform'],['class' => 'btn btn-primary']);
 
 echo $entryMessage . $buttonProceed;

@@ -10,4 +10,8 @@ class CustomerPayment extends ActiveRecord
 	{
         return 'customer_payment';
     }
+
+	public static function primaryKey() {
+		return ['id_customer', 'id_payment'];
+	}
 }

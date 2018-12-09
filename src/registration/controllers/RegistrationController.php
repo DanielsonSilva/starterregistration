@@ -41,13 +41,14 @@ class RegistrationController extends Controller
      */
     public function actionIndex()
     {
-		// $session = Yii::$app->session;
-		// if (!$session->isActive) {
-		// 	$session->open();
-		// }
-		// $session->destroy();
+		$session = Yii::$app->session;
+		if (!$session->isActive) {
+			$session->open();
+		}
 		$this->layout = 'registrationLayout';
-        return $this->render('CustomerFormEntry');
+        return $this->render('CustomerFormEntry', [
+			'continue' => $session->has('str_firstname')
+		]);
     }
 
 	/**
@@ -144,12 +145,9 @@ class RegistrationController extends Controller
 		if (!$session->isActive) {
 			$session->open();
 		}
-		// Start Transaction
-		$transaction = Customer::getDb()->beginTransaction();
 		try {
 			// Save the Customer data
 			$customerModel->attributes = [
-				'id_customer' => null,
 				'str_firstname' => $session->get('str_firstname'),
 				'str_lastname' => $session->get('str_lastname'),
 				'str_telephone' => $session->get('str_telephone'),
@@ -161,21 +159,16 @@ class RegistrationController extends Controller
 				'str_iban' => $session->get('str_iban')
 			];
 			$customerModel->save();
-			//save the log
-			$logCustomerModel->attributes = [
-				'id_customer' => $customerModel->getPrimaryKey(),
-				'dt_activation' => date('Y-m-d H:i:s')
-			];
-			$logCustomerModel->save();
-			$transaction->commit();
-			$customerModel->refresh();
-			var_dump($customerModel->getAttributes());die();
-			return $primaryKey;
+			$customerId = (int) Yii::$app->db->getLastInsertId();
+			// save the log data
+			Yii::$app->db->createCommand('INSERT INTO log_customer (id_customer, dt_activation) VALUES (:id, :dt)', [
+				':id' => $customerId,
+				':dt' => date('Y-m-d H:i:s')
+				])->execute();
+			return $customerId;
 		} catch(\Exception $e) {
-    		$transaction->rollBack();
     		throw $e;
 		} catch(\Throwable $e) {
-    		$transaction->rollBack();
     		throw $e;
 		}
 	}
@@ -184,14 +177,15 @@ class RegistrationController extends Controller
 	 * Get the payment Id
 	 * @return string the Payment ID
 	 */
-	private function getPaymentId($customerId, $iban, $owner): string
+	private function getPaymentId($customerId, $owner, $iban): string
 	{
 		//data to send
 		$dataSend = [
 			'customerId' => $customerId,
 			'iban' => $iban,
-			'owner' =>$owner
+			'owner' => $owner
 		];
+
 		//The url to send the request
 		$url = "https://37f32cl571.execute-api.eu-central-1.amazonaws.com/default/wunderfleet-recruiting-backend-dev-save-payment-data";
 
@@ -212,6 +206,7 @@ class RegistrationController extends Controller
 		// execute post
 		$result = curl_exec($ch);
 		$resultDecoded = json_decode($result);
+
 		$paymentId = $resultDecoded->paymentDataId;
 
 		return $paymentId;
@@ -224,13 +219,12 @@ class RegistrationController extends Controller
 	private function savePayment($customerId, $paymentId): bool
 	{
 		try {
-			$customerPayment = new CustomerPayment();
-			$customerPayment->attributes = [
-				'customer_id' => $customerId,
-				'id_payment' => $paymentId,
-				'dt_payment' => date('Y-m-d H:i:s')
-			];
-			$customerPayment->save();
+			Yii::$app->db->createCommand('INSERT INTO customer_payment (customer_id, id_payment, dt_payment)
+			VALUES (:idcustomer, :idpayment, :dt)', [
+				':idcustomer' => $customerId,
+				':idpayment' => $paymentId,
+				':dt' => date('Y-m-d H:i:s')
+				])->execute();
 			return true;
 		} catch(\Exception $e) {
     		return false;
