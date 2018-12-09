@@ -21,7 +21,7 @@ class Customer extends ActiveRecord
 			'num_house' => \Yii::t('app', 'House Number'),
 			'str_zip' => \Yii::t('app', 'Zip Code'),
 			'id_city' => \Yii::t('app', 'City'),
-			'str_account' => \Yii::t('app', 'Account Number'),
+			'str_account' => \Yii::t('app', 'Account Owner'),
 			'str_iban' => \Yii::t('app', 'IBAN')
 		];
 	}
@@ -29,9 +29,8 @@ class Customer extends ActiveRecord
 	public function rules()
 	{
 		return [
-			[['str_firstname', 'str_lastname', 'str_telephone', 'str_address',
-				'num_house', 'str_zip', 'id_city', 'str_account', 'str_iban'],
-				'required']
+			[['str_firstname', 'str_lastname', 'str_telephone', 'str_address','num_house', 'str_zip', 'id_city', 'str_account', 'str_iban'],'required'],
+			['num_house', 'integer', 'message' => 'The house number must be a number']
 		];
 	}
 }
