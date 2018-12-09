@@ -14,7 +14,7 @@ $entryMessage = <<<MSG
 	You can copy the Payment Identification:\t
 MSG;
 
-$inputId = "<input id='paymentId' type='text' value='$paymentId' size='40' readonly />";
+$inputId = "<input id='paymentId' type='text' value='$paymentId' size='120' readonly />";
 
 $copyClipboard = ClipboardJsWidget::widget([
 	'inputId' => "#paymentId",
@@ -25,4 +25,9 @@ $copyClipboard = ClipboardJsWidget::widget([
 ]);
 
 $entryMessage .= $inputId . $copyClipboard . "</p><br />";
+
+$buttonGoBack = Html::a('Start Again', ['/'],['class' => 'btn btn-primary']);
+
+$entryMessage .= "<p>$buttonGoBack</p>";
+
 echo $entryMessage;

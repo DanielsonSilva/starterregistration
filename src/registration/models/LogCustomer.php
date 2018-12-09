@@ -11,4 +11,8 @@ class LogCustomer extends ActiveRecord
 	{
         return 'log_customer';
     }
+
+	public static function primaryKey() {
+		return ['id_customer'];
+	}
 }
